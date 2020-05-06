@@ -1,0 +1,26 @@
+;;; <summary>
+;;; 
+;;; </summary>
+;;; <param name="a_Wndid"></param>
+;;; <param name="a_row"></param>
+;;; <param name="a_col"></param>
+;;; <param name="a_text"></param>
+subroutine DISPLAY_TEXT
+	required in a_Wndid,		i
+	required in a_row,			n
+	required in a_col,			n
+	required in a_text,			a
+	endparams
+
+	.include "WND:windows.def"
+
+	record
+		achar,		a1
+		tmpchr,		a1
+
+	endrecord
+proc
+	xcall w_disp(a_Wndid,wd_pos,a_row,a_col,a_text)
+
+	xreturn
+end

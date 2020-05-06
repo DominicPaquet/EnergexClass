@@ -1,0 +1,52 @@
+;;; <summary>
+;;; Create un new Window
+;;; </summary>
+;;; <param name="a_Wndid">Returned ID of the created window</param>
+;;; <param name="a_name">window name</param>
+;;; <param name="a_height">window height</param>
+;;; <param name="a_width">window width</param>
+;;; <param name="a_row">window row pos</param>
+;;; <param name="a_col">window col pos</param>
+;;; <param name="a_title">window title</param>
+subroutine CREATE_WINDOW
+	required out a_Wndid,		i
+	required in a_name,			a
+	required in a_height,		n
+	required in a_width,		n
+	optional in a_row,			n
+	optional in a_col,			n
+	optional in a_title,		a
+
+	endparams
+
+	.include "WND:windows.def"
+
+	record
+		row,		i4
+		col,		i4
+
+	endrecord
+proc
+
+	;Check the optional value
+	if (^passed(a_row)) then
+		row = a_row
+	else
+		row = (24 -a_height)/2
+
+	if (^passed(a_col)) then
+		col = a_col
+	else
+		col = (80 -a_width)/2   
+
+
+	xcall w_proc(wp_create, a_Wndid,a_name,a_height,a_width,
+	&	wp_place, a_Wndid,row,col)
+
+	xcall w_brdr(a_Wndid,wb_on)
+
+	if (^passed(a_title))
+		xcall w_brdr(a_Wndid,wb_tpos, wbt_top, wbt_center,wb_title, a_name)
+
+	xreturn
+end

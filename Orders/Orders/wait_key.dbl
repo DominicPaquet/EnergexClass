@@ -1,0 +1,30 @@
+;;; <summary>
+;;; 
+;;; </summary>
+;;; <param name="a_Wndid"></param>
+;;; <param name="a_row"></param>
+;;; <param name="a_col"></param>
+;;; <param name="a_char"></param>
+subroutine WAIT_KEY
+	required in a_Wndid,		i
+	required in a_row,			n
+	required in a_col,			n
+	required out a_char,		a
+	endparams
+
+	.include "WND:windows.def"
+
+	record
+		tmpchr,		a1
+	endrecord
+proc
+	
+	xcall  w_disp(a_Wndid,WD_POS,a_row,a_col," ",WD_MOVE,0,-1,wd_accept,a_char)
+
+	;check for additional char un key buffer
+	while %ttsts 	
+		xcall w_disp(a_Wndid,WD_POS,a_row,a_col,wd_accept,tmpchr)
+
+
+	xreturn
+end

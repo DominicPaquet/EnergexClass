@@ -1,0 +1,14 @@
+;;; <summary>
+;;; 
+;;; </summary>
+;;; <param name="a_Wndid"></param>
+subroutine DELETE_WINDOW	
+	required in a_Wndid,		i
+	endparams
+
+	.include "WND:windows.def"
+proc
+	xcall w_proc(wp_delete, a_Wndid )
+
+	xreturn
+end

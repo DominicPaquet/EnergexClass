@@ -1,0 +1,33 @@
+;;; <summary>
+;;; Display popup message window
+;;; </summary>
+;;; <param name="a_arg">Text to display</param>
+subroutine DISPLAY_MESSAGE
+	required in a_arg,	a
+	endparams
+
+	.include "WND:windows.def"
+
+	record
+		width,		i4
+		col,		i4
+		msgwin,		i4
+		achar,		a1
+		tmpchr,		a1
+	endrecord
+
+proc
+	width = %trim(a_arg) + 2
+	;^size
+	col = (80 - width) / 2
+
+	xcall CREATE_WINDOW(msgwin,"Message", 3, width,10,col,"message")
+
+	xcall DISPLAY_TEXT(msgwin,2,2,a_arg)
+
+	xcall WAIT_KEY(msgwin,2,width,achar)
+
+	xcall DELETE_WINDOW(msgwin)
+
+	xreturn
+end

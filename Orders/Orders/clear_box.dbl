@@ -1,0 +1,33 @@
+;;; <summary>
+;;; 
+;;; </summary>
+;;; <param name="a_wnid"></param>
+;;; <param name="a_fromrow"></param>
+;;; <param name="a_fromcol"></param>
+;;; <param name="a_torow"></param>
+;;; <param name="a_tocol"></param>
+subroutine CLEAR_BOX
+	required in a_wnid,			i
+	required in a_fromrow,		n
+	required in a_fromcol,		n
+	required in a_torow,		n
+	required in a_tocol,		n
+	endparams
+
+	.include "WND:windows.def"
+
+	record
+		count,		i4
+		spaces,		a80
+	endrecord
+proc
+	
+	for count from a_fromrow Thru a_torow
+	begin
+		xcall w_disp(a_wnid,WD_POS,count,a_fromcol,spaces(1:(a_tocol - a_fromcol)))
+	end
+
+	xcall w_disp(a_wnid,WD_POS,a_fromrow,a_fromcol)
+
+	xreturn
+end

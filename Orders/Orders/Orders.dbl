@@ -1,0 +1,198 @@
+
+;;; <summary>
+;;; The main entry point for the application.
+;;; </summary>
+main Orders
+
+	.include "WND:windows.def"
+	.include "INC:header.def"
+	.include "INC:detail.def"
+
+
+	record
+		group datenow, a
+			group date, d
+				year,	d4
+				month,	d2
+				day,	d2
+			endgroup
+			group time, d
+				hour,	d2
+				minute,	d2
+				second,	d2
+			endgroup
+		endgroup
+
+		tt,				i4
+		achar,			a1
+		mnuWinID,		i4
+		OrderWinID,		i4
+		detailwinID,	i4
+
+		;Memory Handle
+		mh,				D_HANDLE
+		ms,				i4
+		mc,				i4
+	endrecord
+
+
+proc		
+	call startup
+	call process
+	call shutdown
+
+	stop
+;*********************************************************************************************
+
+;---------------------------------------------------------------------------------
+;Starup du programme
+;---------------------------------------------------------------------------------
+startup,
+
+	datenow = %datetime
+
+	open(tt=0,i,"tt:")
+	xcall flags(87004020,1)
+	xcall w_init(1,tt, 5)
+	
+.ifndef d_GUI
+		display(tt, $SCR_CLR(SCREEN))
+.else
+	xcall w_caption(wc_set, "Hello world")
+.endc
+
+	return
+
+;---------------------------------------------------------------------------------
+;Main process du programme
+;---------------------------------------------------------------------------------
+process,
+
+	xcall CREATE_WINDOW(mnuWinID,"Menu", 9, 40,,,"Order Menu")
+
+	xcall DISPLAY_TEXT(mnuWinID,2,2,"[A]	Add new order")
+	xcall DISPLAY_TEXT(mnuWinID,4,2,"[V]	View an order")
+	xcall DISPLAY_TEXT(mnuWinID,6,2,"[X]	Exit")
+	xcall DISPLAY_TEXT(mnuWinID,8,2,"Select an option:    ")
+
+	repeat
+	begin
+		xcall WAIT_KEY(mnuWinID,8,20,achar)
+
+		using achar select
+		("A","a"),
+			;xcall DISPLAY_MESSAGE("Otion A is selected")
+			call ORDER_HEADER
+		("V","v"),
+			xcall DISPLAY_MESSAGE("Otion V is selected")
+		("X","x"),
+			;xcall DISPLAY_MESSAGE("Otion X is selected")
+			exitloop
+		(),
+			xcall DISPLAY_MESSAGE("Invalid option")
+		endusing
+	end
+
+	xcall DELETE_WINDOW(mnuWinID)
+
+	return
+
+;---------------------------------------------------------------------------------
+;Shutdown du programme
+;---------------------------------------------------------------------------------
+shutdown,
+
+	xcall w_exit
+
+.ifndef d_GUI
+	display(tt, $SCR_CLR(SCREEN))
+.endc
+	close tt
+
+	;init detail
+	
+	return
+
+;---------------------------------------------------------------------------------
+;Entrer une commande
+;---------------------------------------------------------------------------------
+ORDER_HEADER,
+
+	xcall CREATE_WINDOW(OrderWinID,"Order", 12, 55,7,12,"Order Details")
+
+	;Allocate dynamic Memory for order items
+
+	mh = %mem_proc(DM_ALLOC,^size(strdetail)*(ms=3))
+
+	repeat
+	begin
+		xcall DISPLAY_TEXT(OrderWinID,2,2,"Order number")
+		xcall DISPLAY_TEXT(OrderWinID,4,2,"Customer account")
+		xcall DISPLAY_TEXT(OrderWinID,5,2,"Date")
+		xcall DISPLAY_TEXT(OrderWinID,6,2,"Placed by")
+		xcall DISPLAY_TEXT(OrderWinID,7,2,"Sales Rep number")
+
+
+		xcall input(OrderWinID,2,20,header.oh_number)
+
+		if(!header.oh_number)
+			exitloop
+
+		xcall input(OrderWinID,4,20,header.oh_customer)
+		xcall input(OrderWinID,5,20,header.oh_date,,,true)
+		xcall input(OrderWinID,6,20,header.oh_contact)
+		xcall input(OrderWinID,7,20,header.oh_salesrep)
+
+
+		;Enter Details
+		call ORDER_DETAIL
+
+		;Save in data files
+
+
+		xcall CLEAR_BOX(OrderWinID,4,20,7,55)
+	end
+	
+	xcall DELETE_WINDOW(OrderWinID)
+	mh = %mem_proc(DM_FREE,mh)
+
+	return
+
+;---------------------------------------------------------------------------------
+;Entrer le details d'une commande
+;---------------------------------------------------------------------------------
+ORDER_DETAIL,
+
+	xcall CREATE_WINDOW(detailwinID,"Orderdetails", 12, 55,10,15,"Order Details items")
+	xcall DISPLAY_TEXT(detailwinID,4,2,"Part Number")
+	xcall DISPLAY_TEXT(detailwinID,6,2,"Quantity")
+	xcall DISPLAY_TEXT(detailwinID,8,2,"Unit Price")
+
+	mc = 0
+
+	repeat
+	begin
+
+		if((mc += 1)> ms)
+		;resize dynamic Memory for order items
+		mh = %mem_proc(DM_RESIZ,^size(strdetail)*(ms+=3),mh)
+
+		xcall DISPLAY_TEXT(detailwinID,2,2,"Entering item " + %string(mc) + " of " + %string(ms))
+
+		^m(strdetail[mc].od_number,mh) = header.oh_number
+		^m(strdetail[mc].od_item ,mh) = mc
+
+		xcall input(detailwinID,4,15,^m(strdetail[mc].od_part,mh))
+
+		if(!^m(strdetail[mc].od_part,mh))
+			exitloop
+
+		xcall input(detailwinID,6,15,^m(strdetail[mc].od_qty,mh),true)
+		xcall input(detailwinID,8,15,^m(strdetail[mc].od_unit_price,mh),true)
+
+		xcall CLEAR_BOX(detailwinID,2,15,8,55)
+	end
+
+	xcall DELETE_WINDOW(detailwinID)
+	return
+endmain

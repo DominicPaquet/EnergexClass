@@ -1,0 +1,2 @@
+﻿1>------ Début de la régénération globale : Projet : Orders, Configuration : Debug x64 ------
+========== Régénération globale : 1 a réussi, 0 a échoué, 0 a été ignoré ==========
